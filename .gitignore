@@ -1,3 +1,5 @@
+Lab1/node_modules/
+**/node_modules/**
 # Default ignored files
 /shelf/
 /.idea/workspace.xml
@@ -7,3 +9,6 @@
 /dataSources/
 /dataSources.local.xml
 node_modules/
+**/node_modules/
+.idea/
+**/.idea/
