@@ -4,12 +4,30 @@ import type { Entity, CreateInput} from '../schemas/entity.schema.js';
 
 const storage = new Map<string, Entity>();
 
-export const getAll = (): Entity[] => {
-    return Array.from(storage.values());
+export interface PlayerFilters {
+    role?: string;
+    minRating?: number;
+}
+
+export const getAll = (filters?: PlayerFilters): Entity[] => {
+    let players = Array.from(storage.values());
+    if (filters && filters.role) {
+        players = players.filter(player => player.role === filters.role);
+    }
+
+    if(filters?.minRating !== undefined){
+        players = players.filter(player => player.rating >= filters.minRating!);
+    }
+    return players;
+};
+
+export const getTopPlayers = (): Entity[] =>{
+    let players = Array.from(storage.values());
+    return players.filter(player => player.rating >= 1.2);
 };
 
 export const getById = (id: string): Entity | undefined => {
-    return getById(id);
+    return storage.get(id);
 };
 
 export const create = (data: CreateInput): Entity => {
