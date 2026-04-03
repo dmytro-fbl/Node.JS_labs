@@ -1,68 +1,85 @@
-import {v4 as uuidv4} from 'uuid';
+import Player from "../models/player.model.js";
+import type {IPlayer} from "../models/player.model.js";
 import type { Entity, CreateInput} from '../schemas/entity.schema.js';
-
-
-const storage = new Map<string, Entity>();
 
 export interface PlayerFilters {
     role?: string;
     minRating?: number;
+    sort?: string;
+    page?: number;
+    limit?: number;
 }
 
-export const getAll = (filters?: PlayerFilters): Entity[] => {
-    let players = Array.from(storage.values());
-    if (filters && filters.role) {
-        players = players.filter(player => player.role === filters.role);
-    }
-
-    if(filters?.minRating !== undefined){
-        players = players.filter(player => player.rating >= filters.minRating!);
-    }
-    return players;
-};
-
-export const getTopPlayers = (): Entity[] =>{
-    let players = Array.from(storage.values());
-    return players.filter(player => player.rating >= 1.2);
-};
-
-export const getById = (id: string): Entity | undefined => {
-    return storage.get(id);
-};
-
-export const create = (data: CreateInput): Entity => {
-    const id = uuidv4();
-    const now = new Date();
-
-    const newPlayer: Entity = {
-        ...data,
-        id: id,
-        createdAt: now,
-        updatedAt: now
+export interface PaginatedResponse<T> {
+    data: T[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPage: number;
     };
-    storage.set(id, newPlayer);
-    return newPlayer;
 }
 
-export const update = (id: string, data: Partial<CreateInput>): Entity | null => {
-    const existingPlayer = storage.get(id);
-    if (!existingPlayer) {
-        return null;
+export const getAll = async (filters: PlayerFilters = {}): Promise<PaginatedResponse<IPlayer>> => {
+    const query: Record<string, any> = {};
+
+    if (filters?.role){
+        query.role = filters.role;
+    }
+    if (filters?.minRating !== undefined){
+        query.rating = {$gte: filters.minRating};
+    }
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page -1) * limit;
+
+    let sortOption: Record<string, 1 | -1> = {};
+    if(filters.sort){
+        const isDesc = filters.sort.startsWith('-');
+        const fieldName = isDesc ? filters.sort.substring(1) : filters.sort;
+        sortOption[fieldName] = isDesc ? -1 : 1;
     }
 
-    const updatedPlayer: Entity= {
-        ...existingPlayer,
-        ...data,
-        updatedAt: new Date()
+    const [data, total] = await Promise.all([
+        Player.find(query).sort(sortOption).skip(skip).limit(limit),
+        Player.countDocuments(query)
+    ]);
+    return {
+        data,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPage: Math.ceil(total / limit)
+        }
     };
-    storage.set(id, updatedPlayer);
-    return updatedPlayer;
-}
-
-export const remove = (id: string): boolean => {
-    return storage.delete(id);
 };
 
-export const resetStorage = (): void => {
-    storage.clear();
+export const getTopPlayers = async () => {
+    return Player.find({ rating: { $gte: 1.2} });
+};
+
+export const getById = async (id: string) => {
+  return Player.findById(id);
+};
+
+export const create = async (data: CreateInput) => {
+  return Player.create(data);
+};
+
+export const update = async (id: string, data: Partial<CreateInput>) => {
+  return Player.findByIdAndUpdate(
+      id,
+      data,
+      {
+          new: true,
+          runValidators: true
+      }
+  );
+};
+
+export const remove = async (id: string): Promise<boolean> => {
+    const deletePlayer = await Player.findByIdAndDelete(id);
+    return deletePlayer !== null;
 }
+
