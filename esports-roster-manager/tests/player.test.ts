@@ -242,7 +242,7 @@ describe('API гравців (Інтеграційні тести)', () => {
                 .expect(201);
 
             expect(res.body.nickname).toBe(validPlayer.nickname);
-            expect(res.body._id).toBeDefined(); // MongoDB використовує _id
+            expect(res.body._id).toBeDefined();
         });
 
         it('2. Повинен повернути 400, якщо дані невалідні (немає нікнейму)', async () => {
@@ -251,7 +251,7 @@ describe('API гравців (Інтеграційні тести)', () => {
                 .send({ rating: 1.5, role: "AWPer", description: "test" })
                 .expect(400);
 
-            // Тут структура залежить від твого errorHandler
+
             expect(res.body.message).toBeDefined();
         });
     });
