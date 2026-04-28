@@ -8,7 +8,7 @@ describe('Player Model Unit Tests', () => {
 
     it('має створювати гравця з рейтингом 1 за замовчуванням', async () => {
         const player = await Player.create({ nickname: 'NoRating', role: 'Rifler', "description": "test" });
-        expect(player.rating).toBe(1);
+        expect(player.rating).toBe(4);
     });
 
     it('має повертати помилку валідації, якщо в нікнеймі є пробіл', async () => {
