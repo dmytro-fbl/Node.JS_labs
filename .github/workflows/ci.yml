@@ -51,4 +51,4 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy Application
-        run: flyctl deploy --remote-only
+        run: flyctl deploy --remote-only --wait-timeout 120

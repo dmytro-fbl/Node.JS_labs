@@ -1,41 +1,41 @@
-{
-  "name": "esports-roster-manager",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
-    "build": "tsc",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.0",
-    "express": "^5.2.1",
-    "mongodb": "^7.1.1",
-    "mongoose": "^9.3.3",
-    "uuid": "^13.0.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^25.5.0",
-    "@types/supertest": "^7.2.0",
-    "@types/uuid": "^10.0.0",
-    "jest": "^30.3.0",
-    "mongodb-memory-server": "^11.0.1",
-    "nodemon": "^3.1.14",
-    "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+  {
+    "name": "esports-roster-manager",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "start": "node src/server.js",
+      "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
+      "build": "tsc",
+      "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+      "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+      "cors": "^2.8.6",
+      "dotenv": "^17.4.0",
+      "express": "^5.2.1",
+      "mongodb": "^7.1.1",
+      "mongoose": "^9.3.3",
+      "uuid": "^13.0.0",
+      "zod": "^4.3.6"
+    },
+    "devDependencies": {
+      "@types/cors": "^2.8.19",
+      "@types/express": "^5.0.6",
+      "@types/jest": "^30.0.0",
+      "@types/node": "^25.5.0",
+      "@types/supertest": "^7.2.0",
+      "@types/uuid": "^10.0.0",
+      "jest": "^30.3.0",
+      "mongodb-memory-server": "^11.0.1",
+      "nodemon": "^3.1.14",
+      "supertest": "^7.2.2",
+      "ts-jest": "^29.4.6",
+      "ts-node": "^10.9.2",
+      "typescript": "^5.9.3"
+    }
   }
-}
