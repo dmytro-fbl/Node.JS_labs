@@ -1,10 +1,10 @@
-app = 'esports-roster-manager-ERROR-TEST'
+app = 'esports-roster-manager'
 primary_region = 'fra'
 
 [build]
 
 [http_service]
-  internal_port = 9999
+  internal_port = 3000
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
