@@ -1,4 +1,4 @@
-app = 'esports-roster-manager'
+app = 'esports-roster-manager-ERROR-TEST'
 primary_region = 'fra'
 
 [build]
