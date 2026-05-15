@@ -1,6 +1,6 @@
 import Player from "../models/player.model.js";
 import type {IPlayer} from "../models/player.model.js";
-import type { Entity, CreateInput} from '../schemas/entity.schema.js';
+import type { CreateInput } from '../schemas/entity.schema.js';
 
 export interface PlayerFilters {
     role?: string;
@@ -55,31 +55,42 @@ export const getAll = async (filters: PlayerFilters = {}): Promise<PaginatedResp
     };
 };
 
-export const getTopPlayers = async () => {
-    return Player.find({ rating: { $gte: 1.2} });
+export const getTopPlayers = async (): Promise<PaginatedResponse<IPlayer>> => {
+    const query = { rating: { $gte: 1.2 } };
+    const data = await Player.find(query);
+    const total = data.length;
+
+    return {
+        data,
+        pagination: {
+            page: 1,
+            limit: total,
+            total,
+            totalPage: 1
+        }
+    };
 };
 
 export const getById = async (id: string) => {
-  return Player.findById(id);
+    return Player.findById(id);
 };
 
-export const create = async (data: CreateInput) => {
-  return Player.create(data);
+export const create = async (data: any) => {
+    return Player.create(data);
 };
 
 export const update = async (id: string, data: Partial<CreateInput>) => {
-  return Player.findByIdAndUpdate(
-      id,
-      data,
-      {
-          new: true,
-          runValidators: true
-      }
-  );
+    return Player.findByIdAndUpdate(
+        id,
+        data,
+        {
+            new: true,
+            runValidators: true
+        }
+    );
 };
 
 export const remove = async (id: string): Promise<boolean> => {
     const deletePlayer = await Player.findByIdAndDelete(id);
     return deletePlayer !== null;
 }
-

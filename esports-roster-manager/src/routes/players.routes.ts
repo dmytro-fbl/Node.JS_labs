@@ -1,114 +1,111 @@
-import {type NextFunction, type Response, type Request, Router} from 'express';
-import * as storage from '../storage/players.storage.js'
-import {createSchema, updateSchema} from "../schemas/entity.schema.js";
+import { type NextFunction, type Response, type Request, Router } from 'express';
+import * as storage from '../storage/players.storage.js';
+import { createSchema, updateSchema } from "../schemas/entity.schema.js";
 import { validate } from '../middleware/validate.js';
-
+import { requireAuth, type AuthRequest } from '../middleware/requireAuth.js';
+import Player from '../models/player.model.js';
 
 const router = Router();
 
 router.get('/top', async(req, res, next) => {
-    try{
+    try {
         const topPlayers = await storage.getTopPlayers();
         res.json(topPlayers);
-    }catch(error){
+    } catch(error) {
         res.status(500).json({ message: 'Помилка при отримані топ гравців' });
         next(error);
     }
 });
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-    try{
+    try {
         const filters: storage.PlayerFilters = {};
 
-        if (typeof req.query.role === 'string') {
-            filters.role = req.query.role;
-        }
-
-        if (typeof req.query.minRating === 'string') {
-            const parsedRating = parseFloat(req.query.minRating);
-            if (!isNaN(parsedRating)) {
-                filters.minRating = parsedRating;
-            }
-        }
-
-        if(typeof req.query.sort === 'string') {
-            filters.sort = req.query.sort;
-        }
-
-        if(typeof req.query.page === 'string') {
-            const parsedPage = parseInt(req.query.page, 10);
-            if (!isNaN(parsedPage) && parsedPage > 0) {
-                filters.page = parsedPage;
-            }
-        }
-
-        if (typeof req.query.limit === 'string') {
-            const parsedLimit = parseInt(req.query.limit, 10);
-            if (!isNaN(parsedLimit) && parsedLimit > 0) {
-                filters.limit = parsedLimit;
-            }
-        }
+        if (typeof req.query.role === 'string') filters.role = req.query.role;
+        if (typeof req.query.minRating === 'string') filters.minRating = parseFloat(req.query.minRating);
+        if (typeof req.query.sort === 'string') filters.sort = req.query.sort;
+        if (typeof req.query.page === 'string') filters.page = parseInt(req.query.page, 10);
+        if (typeof req.query.limit === 'string') filters.limit = parseInt(req.query.limit, 10);
 
         const result = await storage.getAll(filters);
         res.json(result);
-    }catch(error){
+    } catch(error) {
         next(error);
     }
 });
 
-router.get('/:id', async (req, res, next) =>{
-    try{
-        const player = await storage.getById(req.params.id);
-
-        if(!player){
-            await res.status(404).json({message: 'Гравця не знайдено'});
+router.get('/:id', async (req, res, next) => {
+    try {
+        const player = await storage.getById(req.params.id as string);
+        if (!player) {
+            res.status(404).json({message: 'Гравця не знайдено'});
             return;
         }
         res.json(player);
-    }catch(error){
+    } catch(error) {
         next(error);
     }
 });
 
-router.post('/', validate(createSchema), async (req, res, next) => {
-    try{
-        const newPlayer = await storage.create(req.body);
+router.post('/', requireAuth, validate(createSchema), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const authReq = req as AuthRequest;
+
+        const newPlayer = new Player({
+            ...authReq.body,
+            ownerId: authReq.userId
+        });
+        await newPlayer.save();
+
         res.status(201).json(newPlayer);
-    }catch(error){
-        const err = error as Error;
+    } catch(error) {
         next(error);
     }
 });
 
-router.patch('/:id', validate(updateSchema), async (req, res, next) => {
-    try{
-        const updatedPlayer = await storage.update(req.params.id as string, req.body);
+router.patch('/:id', requireAuth, validate(updateSchema), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const authReq = req as AuthRequest;
+        const player = await Player.findById(req.params.id as string);
 
-        if(!updatedPlayer){
-            res.status(404).json({message: "Гравця для оновлення не знайдено"});
+        if (!player) {
+            res.status(404).json({ message: "Гравця не знайдено" });
             return;
         }
-        res.json(updatedPlayer);
-    }catch(error){
-        const err = error as Error;
-        // res.status(400).json({ message: 'Помилка оновлення', error: err.message });
+
+        if (!player.ownerId || player.ownerId.toString() !== authReq.userId) {
+            res.status(403).send();
+            return;
+        }
+
+        Object.assign(player, authReq.body);
+        const updated = await player.save();
+        res.json(updated);
+    } catch(error) {
         next(error);
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
-    try{
-        const isDeleted = await storage.remove(req.params.id);
+router.delete('/:id', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const authReq = req as AuthRequest;
+        const playerDoc = await Player.findById(req.params.id as string);
 
-        if(!isDeleted){
+        if (!playerDoc) {
             res.status(404).json({message: "Гравця для видалення не знайдено"});
             return;
         }
+
+        if (!playerDoc.ownerId || playerDoc.ownerId.toString() !== authReq.userId) {
+            res.status(403).send();
+            return;
+        }
+
+        await playerDoc.deleteOne();
         res.status(204).send();
-    }catch(error){
-        // res.status(400).json({ message: 'Помилка при видаленні (можливо невірний ID)' });
+    } catch(error) {
         next(error);
     }
-})
+});
 
 export default router;

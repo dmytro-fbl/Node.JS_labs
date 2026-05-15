@@ -5,6 +5,7 @@ export interface IPlayer extends Document {
     description: string;
     rating: number;
     role: 'IGL' | 'AWPer' | 'Entry Fragger' | 'Support' | 'Rifler';
+    ownerId: mongoose.Types.ObjectId;
     createdAt: Date;
     updateAt: string;
     displaySummary: string;
@@ -46,10 +47,21 @@ const playerSchema = new Schema<IPlayer>(
             max: [3, 'Рейтинг не може бути більшим за 3'],
             default: 1.0
         },
+        ownerId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        }
     },
     {
         timestamps: true,
-        toJSON: { virtuals: true },
+        toJSON: { virtuals: true,
+            transform: (doc, ret: any) => {
+                ret.id = ret._id.toString();
+                if (ret.ownerId) ret.ownerId = ret.ownerId.toString();
+                return ret;
+            }
+        },
         toObject: { virtuals: true },
     });
 

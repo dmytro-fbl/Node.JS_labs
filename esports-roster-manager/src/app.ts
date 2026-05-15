@@ -1,12 +1,15 @@
 import express from "express";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
 
 import playersRoutes from './routes/players.routes.js';
+import authRoutes from "./routes/auth.routes.js";
 import {errorHandler} from "./middleware/errorHandler.js";
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/health', (req, res) => {
     const isConnected = mongoose.connection.readyState === 1;
@@ -18,6 +21,7 @@ app.use('/health', (req, res) => {
 });
 
 app.use('/players', playersRoutes);
+app.use('/auth', authRoutes);
 
 app.use(errorHandler);
 

@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import { connect, close, clear } from "./setup.js";
 import Player from "../src/models/player.model.js";
+
 
 describe('Player Model Unit Tests', () => {
     beforeAll(async () => await connect());
@@ -7,7 +9,12 @@ describe('Player Model Unit Tests', () => {
     afterEach(async () => await clear());
 
     it('має створювати гравця з рейтингом 1 за замовчуванням', async () => {
-        const player = await Player.create({ nickname: 'NoRating', role: 'Rifler', "description": "test" });
+        const player = await Player.create({
+            nickname: 'NoRating',
+            role: 'Rifler',
+            description: "test",
+            ownerId: new mongoose.Types.ObjectId(),
+        });
         expect(player.rating).toBe(1);
     });
 
