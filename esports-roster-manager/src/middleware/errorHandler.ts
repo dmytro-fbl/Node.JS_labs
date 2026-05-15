@@ -22,7 +22,7 @@ export const errorHandler = (
     }
 
     if(err.name === "ValidationError") {
-        const messages = Object.values(err.errors).map((val: any) => val.massage);
+        const messages = Object.values(err.errors).map((val: any) => val.message);
         return res.status(400).json({
             message: 'Помилка валідації бази даних',
             error: messages
